@@ -4,7 +4,7 @@ Fingerprint-based indoor localization methods require the construction of a radi
 
 ## Summary
 
-Fingerprint-based indoor localization methods require the construction of a radio map. This is a tedious task which can be automated. The presented solution consists of a Software-Defined Radio (SDR) mounted on a wheeled-robot (Thymio II). The SDR is connected to a LTE tower. The robot follows a line, stopping every x cm to let the SDR gather characteristics (**Channel State Information** (CSI), **Received Signal Strength Indicator** (RSSI), **Reference Signal Receive Power** (RSRP), ...) from its communication with the LTE tower. Those characteristics are saved, along with the robot's location (estimated through dead-reckoning), and are ready to be used as fingerprints.
+Fingerprint-based indoor localization methods require the construction of a radio map. This is a tedious task which can be automated. The presented solution consists of a Software-Defined Radio (SDR) mounted on a wheeled-robot (Thymio II). The SDR is connected to a LTE tower using a modified version of the srsLTE software. The robot follows a line, stopping every x cm to let the SDR gather characteristics (**Channel State Information** (CSI), **Received Signal Strength Indicator** (RSSI), **Reference Signal Receive Power** (RSRP), ...) from its communication with the LTE tower. Those characteristics are saved, along with the robot's location (estimated through dead-reckoning), and are ready to be used as fingerprints.
 
 ![](doc/img/thymio_running.gif)
 
@@ -20,9 +20,11 @@ Fingerprint-based indoor localization methods require the construction of a radi
 
 ## How to install
 
--   Following instruction on how to install `srsLTE-modified` from [here](https://github.com/arthurgassner/srsLTE-modified)
+-   Following instruction on how to install a fork of `srsLTE` from [here](https://github.com/arthurgassner/srsLTE)
 
-> Make sure `SRSUE_FOLDERPATH` in `run.py` points to the correct location (of the `srsue` folder, from the `srsLTE-modified` installation)
+> This fork saves the channel characteristics (CSI, RSSI, RSRP, ...) to a file
+
+> Make sure `SRSUE_FOLDERPATH` in `run.py` points to the correct location (of the `srsue` folder, from the `srsLTE` installation)
 
 -   Create conda environment and activate it:
 
