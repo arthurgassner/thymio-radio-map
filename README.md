@@ -1,6 +1,6 @@
 Tested with
 
--   Ubuntu 16.04
+-   Ubuntu 18.04
 -   Aseba medulla 1.6.1
 
 ---
@@ -9,7 +9,7 @@ Tested with
 
 -   Following instruction on how to install `srsLTE-modified` from [here](https://github.com/arthurgassner/srsLTE-modified)
 
-> Make sure SRSUE_FOLDERPATH in ´run.py´ points to the correct location (of the srsue folder, from the srsLTE-modified installation)
+> Make sure `SRSUE_FOLDERPATH` in `run.py` points to the correct location (of the `srsue` folder, from the `srsLTE-modified` installation)
 
 -   Create conda environment and activate it:
 
@@ -58,9 +58,3 @@ Some python scripts were written to facilitate the data gathering step, i.e.:
     _ `else_0_raw.txt` -> `else_0.pkl` \* `info_0_raw.txt` -> `info_0.pkl`
 
 -   `plot_fingerprints.py` - Plot the amplitude and phase held in the cleaned `ce.txt` (e.g. `ce_0.parquet`) - Save the plot, e.g.: \* `ce_0.parquet` -> `ce_0.png`
-
----
-
-# Findings
-
--   To load and run .aesl script from the command line, run `sudo asebamassloader --once run.aesl "ser:name=Thymio-II"`
