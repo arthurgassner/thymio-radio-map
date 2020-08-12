@@ -93,10 +93,10 @@ Fingerprint-based indoor localization methods require the construction of a radi
 3. Open another terminal and **launch srsUE** from this repo's root directory
 
     ```bash
-    sudo srsue <PATH_TO_SRSLTE-MODIFIED>/srsue/ue.conf
+    sudo srsue <PATH_TO_SRSLTE>/srsue/ue.conf
     ```
 
-    > Replace `<PATH_TO_SRSLTE-MODIFIED>` by the path to the `srsLTE-modified` software, and `ue.conf` by the configuration file you want to run 
+    > Replace `<PATH_TO_SRSLTE>` by the path to the fork of the `srsLTE` software, and `ue.conf` by the configuration file you want to run 
 
 4. **Wait for the SDR to connect** (the terminal will somewhere output `Network attach: 10.xx.xx.xx`)
 
