@@ -1,3 +1,9 @@
 dependencies:
     - python=3.7
     - click
+    - pandas
+    - seaborn
+    - numpy
+    - pyarrow
+    - jupyterlab
+    - imageio

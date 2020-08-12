@@ -44,12 +44,13 @@ def clean_fingerprints(src_folderpath, force):
     # Load fingerprint IDs
     fingerprint_ids = load_fingerprint_ids(src_folderpath, LOCATIONS_FILENAME)
 
-    if not force:
-        cleaned_fingerprint_ids = get_cleaned_fingerprint_ids(src_ce_folderpath, src_else_folderpath, src_info_folderpath) # get IDs of the fingerprints that already have all three files cleaned
-        fingerprint_ids = sorted(list(set(fingerprint_ids) - set(cleaned_fingerprint_ids)))
-
     print('')
     print('Cleaning {} fingerprints\n'.format(len(fingerprint_ids)))
+
+    if not force:
+        cleaned_fingerprint_ids = get_cleaned_fingerprint_ids(src_ce_folderpath, src_else_folderpath, src_info_folderpath) # get IDs of the fingerprints that already have all three files cleaned
+        print('{}/{} fingerprints already cleaned\n'.format(len(cleaned_fingerprint_ids), len(fingerprint_ids)))
+        fingerprint_ids = sorted(list(set(fingerprint_ids) - set(cleaned_fingerprint_ids)))
 
     for fingerprint_id in fingerprint_ids:
         print('- Clean fingerprint #{}'.format(fingerprint_id))
@@ -109,7 +110,7 @@ def load_fingerprint_ids(src_folderpath, location_filename):
     
     with open(locations_filepath, 'r') as fp:
         locations = json.load(fp)
-        fingerprint_ids = sorted(list(locations.keys()))
+        fingerprint_ids = sorted(map(int, list(locations.keys())))
 
     return fingerprint_ids
 
@@ -134,7 +135,7 @@ def get_cleaned_fingerprint_ids(ce_folderpath, else_folderpath, info_folderpath)
     cleaned_info_files = [f.split('.')[0] for f in listdir(info_folderpath) if f.split('.')[-1] == 'pkl'] # list all .pkl file in info_folderpath
     cleaned_info_fingerprint_ids = [f.split('_')[-1] for f in cleaned_info_files] # extract fingerprint ID from .parquet filename (e.g info_123 --> 123)
 
-    return list(set(cleaned_ce_fingerprint_ids).intersection(set(cleaned_else_fingerprint_ids)).intersection(set(cleaned_info_fingerprint_ids)))
+    return list(map(int, set(cleaned_ce_fingerprint_ids).intersection(set(cleaned_else_fingerprint_ids)).intersection(set(cleaned_info_fingerprint_ids))))
 
 
 def clean_ce(ce_filepath):

@@ -1,22 +1,24 @@
 import os
 import time
+import subprocess
 
 from move_fingerprint import move_fingerprint
 from record_fingerprint import record_fingerprint
 from thymio import Thymio
 
-STARTING_TIMER = 1 # Timer [s] before starting, in case you need to exit the room
+STARTING_TIMER = 20 # Timer [s] before starting, in case you need to exit the room
 SRSUE_CONF_FILEPATH = '../srsLTE-modified/srsue/ue-digital-lab.conf'
 CE_FILEPATH = 'ce.txt'
-CE_FILESIZE = 1 # Filesize [MB] above which the recording is stopped
-N_STEPS = 100 # Amount of RPs to gather
+CE_FILESIZE = 20 # Filesize [MB] above which the recording is stopped
+N_STEPS = 5 # Amount of RPs to gather
 DISTANCE_TO_TRAVEL = 1 # [cm] distance between each RP
 THYMIO_POSITIONS_FILENAME = 'thymio_positions'
-DEST_FOLDERPATH = 'dev'
+DEST_FOLDERPATH = 'line-7'
 
 INITIAL_POSITION = [0,0]
 
 def run():
+    start_time = time.time()
     last_position = INITIAL_POSITION # (x,y) coordinates of the position where the Thymio last stopped
 
     # Inspect {THYMIO_POSITIONS_FILENAME}.txt to infer the Thymio's absolute position    
@@ -35,8 +37,15 @@ def run():
 
     for step in range(N_STEPS):
         print('Fingerprint #{} in [{:.2f}, {:.2f}]'.format(step + len(positions), last_position[0], last_position[1]))
-        print('\t- Record fingerprint')
-        record_fingerprint(SRSUE_CONF_FILEPATH, CE_FILEPATH, CE_FILESIZE)
+
+        rm_fingerprint()
+
+        while True:
+            if os.path.isfile('ce.txt'): # check if ce.txt has reached {ce_filesize} MB
+                size = os.stat('ce.txt').st_size # size of filepath in Bytes
+                if size > CE_FILESIZE * 1e6: # ce_filesize in is MB, size in B
+                    print('\t \t ce.txt filesize ({:.2f} MB) limit ({} MB) reached'.format(size/1e6, CE_FILESIZE))
+                    break
 
         print('\t- Move fingerprint')
         move_fingerprint(x=last_position[0],
@@ -55,6 +64,18 @@ def run():
         print('[{:.2f}, {:.2f}]'.format(last_position[0], last_position[1]))
         print('')
 
+    elapsed_time = time.time() - start_time
+    print('Script took {}'.format(time.strftime('%H:%M:%S', time.gmtime(elapsed_time))))
+
+    # Warn user that the script has finished
+    duration = 10  # seconds
+    freq = 880  # Hz
+    os.system('play -nq -t alsa synth {} sine {}'.format(duration, freq))
+
+def rm_fingerprint():
+    subprocess.run('rm -f ce.txt', shell=True)
+    subprocess.run('rm -f else.txt', shell=True)
+    subprocess.run('rm -f info.txt', shell=True)
 
 def fetch_last_position(filepath):
     """Inspect {filepath}.txt to infer the Thymio's last absolute position, i.e. the last one appended    

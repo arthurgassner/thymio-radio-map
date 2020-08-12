@@ -20,49 +20,155 @@ Fingerprint-based indoor localization methods require the construction of a radi
 
 ## How to install
 
--   Following instruction on how to install a fork of `srsLTE` from [here](https://github.com/arthurgassner/srsLTE)
+1. **Install a fork of `srsLTE`** following [this](https://github.com/arthurgassner/srsLTE)
+    > This fork saves the channel characteristics (CSI, RSSI, RSRP, ...) to a file
 
-> This fork saves the channel characteristics (CSI, RSSI, RSRP, ...) to a file
+    > Make sure `SRSUE_FOLDERPATH` in `run.py` points to the correct location (of the `srsue` folder, from the `srsLTE` installation)
 
-> Make sure `SRSUE_FOLDERPATH` in `run.py` points to the correct location (of the `srsue` folder, from the `srsLTE` installation)
+2. **Install the Thymio Suite** and **prepare the connection with the Thymio II** following [this](https://www.thymio.org/help/linux-installation/)
 
--   Create conda environment and activate it:
+3. **Install Aseba** following [this](http://wiki.thymio.org/en:linuxinstall)
 
-`conda env create -f environment.yml -n thymio`
+    > - Run `asebamedulla --version` to ensure it is correctly installed
 
-`conda activate thymio`
+4. **Ensure that you're able to connect** to the Thymio II by launching `asebastudio` through some terminal. You'll be prompted to select a target: select the one called `Thymio-II`. This should establish the connection.
 
--   Install `dbus` and `gobject`:
+    > If clicking on the `Thymio-II` target simply re-shows the same popup, this is a known bug. To fix it, add yourself to the dialout group (`sudo adduser <USERNAME> dialout`), replacing `<USERNAME>` by your Ubuntu username. Log out then log in for the change to take effect.
 
-`pip install dbus-python`
+    > Make sure the Thymio II is connected to the computer by USB
 
-`pip install PyGObject`
+5. **Create conda environment** (called `thymio`) and activate it:
 
-> Somehow it does not work if it is in the `environment.yml`
+    ```bash
+    conda env create -f environment.yml -n thymio
+    conda activate thymio
+    ```
 
--   Install **Aseba** from [here](http://wiki.thymio.org/en:linuxinstall)
+6. **Install `dbus`**, **`gobject`** and **sox**:
+
+    `pip install dbus-python`
+
+    > To install `dbus-python`, you might need to first run `sudo apt install git virtualenv build-essential python3-dev libdbus-glib-1-dev libgirepository1.0-dev libcairo2-dev`
+
+    `pip install PyGObject`
+
+    `sudo apt install sox`
 
 ---
+
 
 ## How to run
 
--   Connect by USB the Thymio II to the computer
+### Non-continuous (Reconnect to the eNodeB at every RP)
 
--   Switch to the conda environment created in the above step
+1. **Connect by USB** the **Thymio II**, the **Software-Defined Radio** and the **PC/SC reader** (with a SIM card plugged in) to the computer
 
--   Open a shell and run `sudo asebamedulla "ser:name=Thymio-II"`
+2. Open a terminal and **establish the connection to the Thymio II** by running:
 
-> The shell should display `Found Thymio-II on port /dev/ttyACM0` and then keep running.
+    ```bash
+    asebamedulla "ser:name=Thymio-II"
+    ```
 
--   Open another shell and run
+    > This opens a connection to the Thymio II. The terminal should read `Found Thymio-II on port /dev/ttyACM0` and keep running.
 
-```
-sudo `which python` ./run.py
-```
+3. Open another terminal and launch the run script by running:
+
+    ```bash
+    conda activate thymio
+    python run.py
+    ```
+
+### Continuous (Connect once)
+
+1. **Connect by USB** the **Thymio II**, the **Software-Defined Radio** and the **PC/SC reader** (with a SIM card plugged in) to the computer
+
+2. Open a terminal and **establish the connection to the Thymio II** by running:
+
+    ```bash
+    asebamedulla "ser:name=Thymio-II"
+    ```
+
+    > This opens a connection to the Thymio II. The terminal should read `Found Thymio-II on port /dev/ttyACM0` and keep running.
+
+3. Open another terminal and **launch srsUE** from this repo's root directory
+
+    ```bash
+    sudo srsue <PATH_TO_SRSLTE-MODIFIED>/srsue/ue.conf
+    ```
+
+    > Replace `<PATH_TO_SRSLTE-MODIFIED>` by the path to the `srsLTE-modified` software, and `ue.conf` by the configuration file you want to run 
+
+4. **Wait for the SDR to connect** (the terminal will somewhere output `Network attach: 10.xx.xx.xx`)
+
+    > The fingerprint files (i.e. `ce.txt`, `else.txt` and `info.txt`) should appear in this repo's root directory. Watch out, because `ce.txt` will grow quickly in size.
+
+5. Open another terminal and **ping the above IP address** by running 
+
+    ```bash
+    ping 10.xx.xx.xx
+    ```
+
+    > This maintains the connection between the SDR and the eNodeB. Otherwise, no traffic is sent and the connection eventually times out.
+
+6. Open another terminal and **launch the run script** by running:
+
+    ```bash
+    conda activate thymio
+    python run_continuous.py
+    ```
 
 ---
 
-## How to handle the generated files 
+## Test files
+
+To ensure that the Thymio and SDR are working, several files are available:
+
+- `test_thymio.py`
+- `test_fingerprint.py`
+
+### `test_thymio.py`
+
+To ensure that the Thymio II is able to work as intended:
+
+1. **Plug in the Thymio II** through USB and place the Thymio II on the line to follow
+
+2. Open a terminal and **establish the connection to the Thymio II** by running:
+
+    ```bash
+    asebamedulla "ser:name=Thymio-II"
+    ```
+
+3. Open another terminal and **launch the test script** by running:
+
+    ```bash
+    conda activate thymio
+    python test_thymio.py
+    ```
+
+    > This should instruct the Thymio to follow the black-line for x cm, then wait, then repeat y times
+
+![](doc/img/thymio_running.gif)
+
+### `test_fingerprint.py`
+
+To ensure that the Software Defined Radio works as intended:
+
+1. **Connect via USB** the **Software-Defined Radio** (SDR) and the **PC/SC reader** (with a SIM card plugged in) to the computer
+
+    > For the SDR, you **have** to used USB 3.0, else the datarate is too high for the connection.
+
+2. Open a terminal and **launch the test script** by running:
+
+    ```bash
+    conda activate thymio
+    python test_fingerprint.py
+    ```
+
+    > This should instruct the SDR to connect to the eNodeB, gather a fingerprint and save it in a folder called `test_fingerprint`
+
+---
+
+## How to handle the generated files
 
 Some python scripts were written to facilitate the data gathering step, i.e.:
 

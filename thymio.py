@@ -8,22 +8,23 @@ import pickle
 import os
 
 SPEED = 100
-TIMESTEP = 100 # [ms]
-WHEEL_RADIUS = 2.1 # [cm] # TODO CHANGE THIS TO THE REAL VALUE
+TIMESTEP = 10 # [ms]
+WHEEL_RADIUS = 1.91 # [cm]
 AXLE_LENGTH = 10.1 # [cm] distance between each wheel  TODO CHANGE THIS TO THE REAL VALUE
 SPEED_UNIT_TO_RADS_CONVERTION = 9.53/500 # 500 in motor speed corresponds to 9.53 [rad/s] according to https://cyberbotics.com/doc/guide/thymio2 # TODO is this really correct ?
-MOTOR_LEFT_TRESH = 900
-MOTOR_RIGHT_TRESH = 1000
-P_GAIN = 0.4
-THYMIO_POSITIONS_FILENAME = 'thymio_positions'
+MOTOR_LEFT_TRESH = 300
+MOTOR_RIGHT_TRESH = 300
+P_GAIN = 1.0
 
 class Thymio(object):
-    def __init__(self, initial_position, distance_to_travel):
+    def __init__(self, initial_position, distance_to_travel, positions_filename, dest_folderpath):
         """Initialize the Thymio instance with its initial position
 
         Arguments:
             initial_position {List of 2 floats} -- (x,y) coordinates of the initial position
             distance_to_travel (float): distance [cm] forward the Thymio must travel
+            positions_filename (str): filename of the .txt holding the Thymio's past locations where it stopped
+            dest_folderpath (str): folderpath where to store {positions_filename}.txt
         """
 
         dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
@@ -35,11 +36,14 @@ class Thymio(object):
         # Schedule controller
         gobject.timeout_add(TIMESTEP, self.followLine)
 
-        # Ensure {THYMIO_POSITIONS_FILENAME}.txt exists
-        thymio_positions_filepath = '{}.txt'.format(THYMIO_POSITIONS_FILENAME)
-        if not os.path.isfile(thymio_positions_filepath):
-            thymio_positions = []
-            with open(thymio_positions_filepath, 'w') as fp:
+        # Ensure {dest_folderpath}/ exists
+        if not os.path.isdir(dest_folderpath):
+            os.mkdir(dest_folderpath)
+
+        # Ensure {dest_folderpath/positions_filename}.txt exists
+        self.positions_filepath = os.path.join(dest_folderpath, '{}.txt'.format(positions_filename))
+        if not os.path.isfile(self.positions_filepath):
+            with open(self.positions_filepath, 'w') as _:
                 pass
 
         self.ground_sensors = [0, 0]
@@ -56,7 +60,7 @@ class Thymio(object):
         """Follow the line for one TIMESTEP"""
 
         if self.hasReachedDistance():
-            self.saveCurrentPosition(THYMIO_POSITIONS_FILENAME)
+            self.saveCurrentPosition(self.positions_filepath)
 
             self.network.SetVariable("thymio-II", "motor.left.target", [0])
             self.network.SetVariable("thymio-II", "motor.right.target", [0])
@@ -73,7 +77,7 @@ class Thymio(object):
             motor_left_target += delta_speed
             motor_right_target -= delta_speed
         elif self.ground_sensors[1] > MOTOR_RIGHT_TRESH:
-            delta_speed = abs(self.ground_sensors[1] - 950) * P_GAIN
+            delta_speed = abs(self.ground_sensors[1] - 950) * P_GAIN * 2 # TODO clean this x2  
             delta_speed = min(delta_speed, 100)
             motor_left_target -= delta_speed
             motor_right_target += delta_speed
@@ -130,12 +134,12 @@ class Thymio(object):
     def getCurrentPosition(self):
         return self.current_position
 
-    def saveCurrentPosition(self, filename):
+    def saveCurrentPosition(self, filepath):
         positions = []
-        with open('{}.txt'.format(filename), 'r') as fp:
+        with open(filepath, 'r') as fp:
             positions = [line.rstrip() for line in fp.readlines()]
 
-        with open('{}.txt'.format(filename), 'w') as fp:
+        with open(filepath, 'w') as fp:
             x, y = self.current_position
             positions.append([float(x), float(y)])
             fp.writelines("{}\n".format(position) for position in positions)

@@ -158,12 +158,11 @@ def get_fingerprint_id(dest_folderpath, locations_filename):
     """
     with open('{}/{}.json'.format(dest_folderpath, locations_filename), 'r') as fp:
         locations = json.load(fp)
-        fingerprint_ids = sorted(list(locations.keys()))
+        fingerprint_ids = sorted(map(int, list(locations.keys())))
         if len(fingerprint_ids) > 0:
             return int(fingerprint_ids[-1]) + 1
         else:
             return 0
-
 
 def move(src, dest, verbose):
     log('\t Move {} to {}'.format(src, dest), end='', verbose=verbose)
