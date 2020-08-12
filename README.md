@@ -4,7 +4,7 @@ Fingerprint-based indoor localization methods require the construction of a radi
 
 ## Summary
 
-Fingerprint-based indoor localization methods require the construction of a radio map. This is a tedious task which can be automated. The presented solution consists of a Software-Defined Radio (SDR) mounted on a wheeled-robot (Thymio II). The SDR is connected to an LTE tower. The robot follows a line, stopping every x cm to gather location-dependent characteristics (Channel State Information (CSI), RSSI, RSRP, ...).
+Fingerprint-based indoor localization methods require the construction of a radio map. This is a tedious task which can be automated. The presented solution consists of a Software-Defined Radio (SDR) mounted on a wheeled-robot (Thymio II). The SDR is connected to a LTE tower. The robot follows a line, stopping every x cm to let the SDR gather characteristics (**Channel State Information** (CSI), **Received Signal Strength Indicator** (RSSI), **Reference Signal Receive Power** (RSRP), ...) from its communication with the LTE tower. Those characteristics are saved, along with the robot's location (estimated through dead-reckoning).
 
 ![](doc/img/thymio_running.gif)
 
