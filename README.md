@@ -16,6 +16,8 @@ Fingerprint-based indoor localization methods require the construction of a radi
 - USRP B200mini
 - PC/SC reader with a SIM card
 
+![](doc/img/overall_setup_small.jpg)
+
 ---
 
 ## How to install
